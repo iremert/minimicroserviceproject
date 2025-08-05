@@ -5,7 +5,7 @@ using NoteService.Services;
 namespace NoteService.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]")] //<3
     public class NotesController : ControllerBase
     {
         private readonly NoteServicee _noteService;
