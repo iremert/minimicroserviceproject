@@ -1,4 +1,4 @@
-name: .NET CI
+name: .NET CI & CD
 
 on:
   push:
@@ -27,3 +27,41 @@ jobs:
 
       - name: Run tests
         run: dotnet test --no-build --configuration Release --verbosity normal
+
+  docker-push:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & push note-service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./NoteService
+          file: ./NoteService/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/note-service:latest
+
+      - name: Build & push user-service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./UserService
+          file: ./UserService/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
+
+      - name: Build & push gateway-service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./GatewayService
+          file: ./GatewayService/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/gateway-service:latest
