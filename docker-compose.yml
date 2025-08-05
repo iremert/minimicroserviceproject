@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  note-service:
+    build:
+      context: ./NoteService
+    ports:
+      - "5195:80"
+
+  user-service:
+    build:
+      context: ./UserService
+    ports:
+      - "5291:80"
+
+  gateway:
+    build:
+      context: ./GatewayService
+    ports:
+      - "8000:80"
+    depends_on:
+      - note-service
+      - user-service
