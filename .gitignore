@@ -1,0 +1,11 @@
+# Visual Studio önbellek dosyaları
+.vs/
+
+# Derleme çıktıları
+bin/
+obj/
+
+# Kullanıcı/IDE ayarları
+*.user
+*.suo
+*.log
