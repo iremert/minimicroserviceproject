@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoteService.Tests", "NoteSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Tests", "UserService.Tests\UserService.Tests.csproj", "{07B66927-8361-43BB-95E7-4FBF4FBBE03C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "auth-server", "auth-server\auth-server.csproj", "{CC177307-F282-4EC1-95C8-AB9DEFA4D7B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{07B66927-8361-43BB-95E7-4FBF4FBBE03C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07B66927-8361-43BB-95E7-4FBF4FBBE03C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07B66927-8361-43BB-95E7-4FBF4FBBE03C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC177307-F282-4EC1-95C8-AB9DEFA4D7B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC177307-F282-4EC1-95C8-AB9DEFA4D7B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC177307-F282-4EC1-95C8-AB9DEFA4D7B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC177307-F282-4EC1-95C8-AB9DEFA4D7B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

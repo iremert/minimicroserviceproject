@@ -1,6 +1,12 @@
 version: '3.8'
 
 services:
+  auth-server:
+    build:
+      context: ./auth-server
+    ports:
+      - "5000:80"
+
   note-service:
     build:
       context: ./NoteService
@@ -19,5 +25,6 @@ services:
     ports:
       - "8000:80"
     depends_on:
+      - auth-server   
       - note-service
       - user-service
