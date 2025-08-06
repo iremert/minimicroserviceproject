@@ -1,37 +1,34 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+ï»¿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1) Ocelot yapılandırma dosyasını oku
-builder.Configuration.AddJsonFile(
-    "ocelot.json",
-    optional: false,
-    reloadOnChange: true);
+// 1) Ocelot yapÄ±landÄ±rma dosyasÄ±nÄ± oku
+builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 
-// 2) Kimlik doğrulama (IdentityServer ? JWT Bearer)
+// 2) Kimlik doÄŸrulama (IdentityServer â†’ JWT Bearer)
 builder.Services
     .AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", opts =>
     {
-        opts.Authority = "http://auth-server";  // docker-compose’ta auth-server konteyner adı
-        opts.RequireHttpsMetadata = false;      // HTTP kullanıyoruz, HTTPS zorunlu olmasın
-        opts.Audience = null;                   // Ocelot scope bazlı kontrol yapacak
+        opts.Authority = "http://auth-server:8080";   // â† auth-server iÃ§ portu 8080
+        opts.RequireHttpsMetadata = false;
+        opts.Audience = null;                         // scope denetimini Ocelot yapacak
     });
 
-builder.Services.AddAuthorization();           // (isteğe bağlı ama iyi olur)
+builder.Services.AddAuthorization();                  // isteÄŸe baÄŸlÄ± ama faydalÄ±
 
-// 3) Ocelot’u ekle
+// 3) Ocelotâ€™u ekle
 builder.Services.AddOcelot();
 
 var app = builder.Build();
 
 app.UseRouting();
 
-// 4) Auth ? Ocelot
+// 4) Auth  â†’  Ocelot
 app.UseAuthentication();
 app.UseAuthorization();
 
-await app.UseOcelot();                          // Gateway middleware’i
+await app.UseOcelot();                                // Gateway middlewareâ€™i
 app.Run();

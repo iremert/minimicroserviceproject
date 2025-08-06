@@ -3,9 +3,9 @@ version: '3.8'
 services:
   auth-server:
     build:
-      context: ./auth-server
+      context: ./auth-server        # ← :latest silindi
     ports:
-      - "5000:80"
+      - "5000:8080"                 # dış 5000 → iç 8080
 
   note-service:
     build:
@@ -25,6 +25,6 @@ services:
     ports:
       - "8000:80"
     depends_on:
-      - auth-server   
+      - auth-server
       - note-service
       - user-service
