@@ -40,22 +40,27 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-north-1
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build & push services to ECR
+      - name: Build & Push all services to ECR
         run: |
-          for svc in auth-server NoteService UserService GatewayService; do
-            name=$(echo "$svc" | tr '[:upper:]' '[:lower:]')
-            docker build -t "${{ secrets.ECR_REGISTRY }}/$name:latest" ./"$svc"
-            docker push "${{ secrets.ECR_REGISTRY }}/$name:latest"
+          export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          export AWS_DEFAULT_REGION=eu-north-1
+
+          aws ecr get-login-password \
+            --region eu-north-1 \
+          | docker login --username AWS --password-stdin 586449240747.dkr.ecr.eu-north-1.amazonaws.com
+
+          for dir in auth-server NoteService UserService GatewayService; do
+            case $dir in
+              NoteService)   name=note-service;;
+              UserService)   name=user-service;;
+              GatewayService)name=gateway-service;;
+              *)             name=$dir;;
+            esac
+
+            echo "👉 Building & pushing $name..."
+            docker build -t "586449240747.dkr.ecr.eu-north-1.amazonaws.com/$name:latest" ./"$dir"
+            docker push "586449240747.dkr.ecr.eu-north-1.amazonaws.com/$name:latest"
           done
 
 
