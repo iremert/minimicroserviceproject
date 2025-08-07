@@ -1,6 +1,8 @@
 ﻿using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 
+//*
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddIdentityServer(options =>
