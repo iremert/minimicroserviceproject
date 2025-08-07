@@ -36,41 +36,26 @@ jobs:
   ecr-push:
     needs: build-and-test
     runs-on: ubuntu-latest
-    env:                     # ← region tüm adımlar için hazır
-      AWS_REGION: ${{ secrets.AWS_REGION }}
 
     steps:
       - uses: actions/checkout@v3
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-north-1
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
-        with:
-          region: ${{ env.AWS_REGION }}      # ← açıkça geçiriyoruz
 
-      # Auth-server → ECR
-      - uses: docker/build-push-action@v4
-        with:
-          context: ./auth-server
-          push: true
-          tags: ${{ secrets.ECR_REGISTRY }}/auth-server:latest
+      - name: Build & push services to ECR
+        run: |
+          for svc in auth-server NoteService UserService GatewayService; do
+            name=$(echo "$svc" | tr '[:upper:]' '[:lower:]')
+            docker build -t "${{ secrets.ECR_REGISTRY }}/$name:latest" ./"$svc"
+            docker push "${{ secrets.ECR_REGISTRY }}/$name:latest"
+          done
 
-      # Note-service → ECR
-      - uses: docker/build-push-action@v4
-        with:
-          context: ./NoteService
-          push: true
-          tags: ${{ secrets.ECR_REGISTRY }}/note-service:latest
 
-      # User-service → ECR
-      - uses: docker/build-push-action@v4
-        with:
-          context: ./UserService
-          push: true
-          tags: ${{ secrets.ECR_REGISTRY }}/user-service:latest
-
-      # Gateway-service → ECR
-      - uses: docker/build-push-action@v4
-        with:
-          context: ./GatewayService
-          push: true
-          tags: ${{ secrets.ECR_REGISTRY }}/gateway-service:latest
