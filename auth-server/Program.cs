@@ -16,5 +16,5 @@ builder.Services
     .AddDeveloperSigningCredential();                    // dev anahtarı
 
 var app = builder.Build();
-app.UseIdentityServer();                                 // ../.well-known, /connect/token
+app.UseIdentityServer();                                 // /.well-known, /connect/token
 app.Run();
