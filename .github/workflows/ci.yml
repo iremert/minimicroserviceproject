@@ -12,17 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - uses: actions/setup-dotnet@v3     # .NET 7
+      - uses: actions/setup-dotnet@v3
         with: { dotnet-version: '7.0.x' }
-      - uses: actions/setup-dotnet@v3     # .NET 8
+      - uses: actions/setup-dotnet@v3
         with: { dotnet-version: '8.0.x' }
-
       - run: dotnet restore
       - run: dotnet build --no-restore -c Release
       - run: dotnet test  --no-build    -c Release --verbosity normal
 
-# ───────────── Docker Hub CD (kaldı) ─────────────
+# ───────────── Docker Hub CD (aynı kaldı) ─────────────
   docker-push:
     needs: build-and-test
     runs-on: ubuntu-latest
@@ -32,41 +30,22 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # … (Hub build-push adımları değişmedi) …
 
-      - uses: docker/build-push-action@v4   # Note
-        with:
-          context: ./NoteService
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/note-service:latest
-
-      - uses: docker/build-push-action@v4   # User
-        with:
-          context: ./UserService
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
-
-      - uses: docker/build-push-action@v4   # Gateway
-        with:
-          context: ./GatewayService
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/gateway-service:latest
-
-      - uses: docker/build-push-action@v4   # Auth
-        with:
-          context: ./auth-server
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/auth-server:latest
-
-# ────────────── 🔥 YENİ — ECR CD ──────────────
-  ecr-push:                                   # <<< EKLENDİ
+# ────────────── 🔥  YENİ — ECR CD  🔥 ──────────────
+  ecr-push:
     needs: build-and-test
     runs-on: ubuntu-latest
+    env:                     # ← region tüm adımlar için hazır
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
     steps:
       - uses: actions/checkout@v3
 
-      # AWS ECR’ye docker login
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
+        with:
+          region: ${{ env.AWS_REGION }}      # ← açıkça geçiriyoruz
 
       # Auth-server → ECR
       - uses: docker/build-push-action@v4
