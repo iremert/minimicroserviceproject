@@ -7,73 +7,91 @@ on:
     branches: [ master ]
 
 jobs:
+# ───────────────────────────── CI ─────────────────────────────
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Setup .NET 7 SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '7.0.x'
-      - name: Setup .NET 8 SDK
-        uses: actions/setup-dotnet@v3     # sonra 8
-        with:
-          dotnet-version: '8.0.x'
+      - uses: actions/setup-dotnet@v3     # .NET 7
+        with: { dotnet-version: '7.0.x' }
+      - uses: actions/setup-dotnet@v3     # .NET 8
+        with: { dotnet-version: '8.0.x' }
 
-      - name: Restore dependencies
-        run: dotnet restore
+      - run: dotnet restore
+      - run: dotnet build --no-restore -c Release
+      - run: dotnet test  --no-build    -c Release --verbosity normal
 
-      - name: Build solution
-        run: dotnet build --no-restore --configuration Release
-
-      - name: Run tests
-        run: dotnet test --no-build --configuration Release --verbosity normal
-
+# ───────────── Docker Hub CD (kaldı) ─────────────
   docker-push:
     needs: build-and-test
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - uses: actions/checkout@v3
+      - uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build & push note-service
-        uses: docker/build-push-action@v4
+      - uses: docker/build-push-action@v4   # Note
         with:
           context: ./NoteService
-          file: ./NoteService/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/note-service:latest
 
-      - name: Build & push user-service
-        uses: docker/build-push-action@v4
+      - uses: docker/build-push-action@v4   # User
         with:
           context: ./UserService
-          file: ./UserService/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
 
-      - name: Build & push gateway-service
-        uses: docker/build-push-action@v4
+      - uses: docker/build-push-action@v4   # Gateway
         with:
           context: ./GatewayService
-          file: ./GatewayService/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/gateway-service:latest
-      
-      - name: Build & push auth-server
-        uses: docker/build-push-action@v4
+
+      - uses: docker/build-push-action@v4   # Auth
         with:
-          context: ./auth-server           # proje klasörü
-          file: ./auth-server/Dockerfile   # Dockerfile yolu
+          context: ./auth-server
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/auth-server:latest
+
+# ────────────── 🔥 YENİ — ECR CD ──────────────
+  ecr-push:                                   # <<< EKLENDİ
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # AWS ECR’ye docker login
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Auth-server → ECR
+      - uses: docker/build-push-action@v4
+        with:
+          context: ./auth-server
+          push: true
+          tags: ${{ secrets.ECR_REGISTRY }}/auth-server:latest
+
+      # Note-service → ECR
+      - uses: docker/build-push-action@v4
+        with:
+          context: ./NoteService
+          push: true
+          tags: ${{ secrets.ECR_REGISTRY }}/note-service:latest
+
+      # User-service → ECR
+      - uses: docker/build-push-action@v4
+        with:
+          context: ./UserService
+          push: true
+          tags: ${{ secrets.ECR_REGISTRY }}/user-service:latest
+
+      # Gateway-service → ECR
+      - uses: docker/build-push-action@v4
+        with:
+          context: ./GatewayService
+          push: true
+          tags: ${{ secrets.ECR_REGISTRY }}/gateway-service:latest

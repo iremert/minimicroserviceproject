@@ -2,11 +2,6 @@
 using Duende.IdentityServer.Test;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// ─────────────────────────────────────────────
-//  IdentityServer + In-Memory configuration
-//  (issuer sabit: http://auth-server:8080)
-// ─────────────────────────────────────────────
 builder.Services
     .AddIdentityServer(options =>
     {
