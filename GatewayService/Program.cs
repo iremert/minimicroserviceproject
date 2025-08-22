@@ -30,8 +30,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
 app.MapHealthChecks("/health"); // ✅ ALB health check burayı kontrol edecek
+app.MapControllers();
+
 
 await app.UseOcelot();
 
