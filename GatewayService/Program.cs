@@ -20,7 +20,8 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddControllers(); // ✅ eklendi
+builder.Services.AddControllers();
+builder.Services.AddHealthChecks(); // ✅ Health check servisini ekle
 builder.Services.AddOcelot();
 
 var app = builder.Build();
@@ -29,7 +30,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers(); // ✅ eklendi
+app.MapControllers();
+app.MapHealthChecks("/health"); // ✅ ALB health check burayı kontrol edecek
 
 await app.UseOcelot();
 
