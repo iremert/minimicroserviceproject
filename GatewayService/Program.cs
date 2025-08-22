@@ -30,7 +30,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHealthChecks("/health"); // ✅ ALB health check burayı kontrol edecek
+app.MapHealthChecks("/health").AllowAnonymous();
 app.MapControllers();
 
 
