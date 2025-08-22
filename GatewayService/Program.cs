@@ -1,4 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;   // eklendi
+﻿using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
@@ -15,16 +15,22 @@ builder.Services
         opts.RequireHttpsMetadata = false;
         opts.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateAudience = false   // ← aud kontrolü kapalı
+            ValidateAudience = false
         };
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddControllers(); // ✅ eklendi
 builder.Services.AddOcelot();
 
 var app = builder.Build();
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers(); // ✅ eklendi
+
 await app.UseOcelot();
+
 app.Run();
